@@ -1,5 +1,10 @@
 import pandas as pd
 import numpy as np
+from interpret.analizaText import count_genres_in_text
+from interpret.cautariFilme import recommend_movies_from_text_all_genres, find_movie_title_in_text
+from interpret.cautariFilme import recommend_movies_from_text_any_genre
+from interpret.cautariFilme import recommend_movies_from_text
+from interpret.cautariFilme import recommend_movies
 
 # Simulating loading of data
 # Imagine these are two small extracts from the 'movies.csv' and 'ratings.csv' files of the MovieLens dataset
@@ -8,7 +13,7 @@ import numpy as np
 movies_data = {
     'movieId': [1, 2, 3, 4, 5],
     'title': ['Toy Story (1995)', 'Jumanji (1995)', 'Grumpier Old Men (1995)', 'Waiting to Exhale (1995)', 'Father of the Bride Part II (1995)'],
-    'genres': ['Adventure|Animation|Children|Comedy|Fantasy', 'Adventure|Children|Fantasy', 'Comedy|Romance', 'Comedy|Drama|Romance', 'Comedy']
+    'genres': ['Adventure|Animation|Children|Comedy|Fantasy', 'Adventure|Children|Fantasy|Action', 'Comedy|Romance', 'Comedy|Drama|Romance', 'Comedy']
 }
 
 # Sample ratings data
@@ -22,11 +27,8 @@ ratings_data = {
 # Convert to Pandas DataFrames
 movies_df = pd.DataFrame(movies_data)
 ratings_df = pd.DataFrame(ratings_data)
-
 # Display the first few rows of each DataFrame
 movies_df.head(), ratings_df.head()
-print(movies_df.head())
-print(ratings_df.head())
 # Splitting genres into a format that can be used for content-based filtering
 # Creating a binary-encoded column for each genre
 
@@ -44,8 +46,6 @@ ratings_df.drop('timestamp', axis=1, inplace=True)
 
 # Let's display the updated movies DataFrame to see the binary-encoded genre columns
 movies_df.head(), movies_df.columns
-print(movies_df.head())
-print(ratings_df.head())
 
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -60,27 +60,35 @@ cosine_sim = cosine_similarity(genre_matrix, genre_matrix)
 cosine_sim_df = pd.DataFrame(cosine_sim, index=movies_df['title'], columns=movies_df['title'])
 
 # Display the cosine similarity matrix for the first 5 movies
-print(cosine_sim_df.iloc[:5, :5])
+#print(cosine_sim_df.iloc[:5, :5])
+# print('---->')
+# text = "I'm looking for a Jumanji (1995) and a romance  movie."
+# textMovie = "I'm looking for a Jumanji (1995) and a romance  movie."
+# #textMovie = "Have you seen Jumanji (1995)?"
+# counter = count_genres_in_text(text)
+# movie_title_found = find_movie_title_in_text(textMovie, movies_df)
+# print(counter)
+# print(movie_title_found)
+#
+# if movie_title_found:
+#     respuns = recommend_movies(movie_title_found,cosine_sim_df)
+#     print(respuns)
+# else:
+#     print("No movie title found in the text.")
+# print('in movie title')
+# if counter == 0 and not movie_title_found:
+#     print('No genres found in the text.')
+# else:
+#     raspuns = recommend_movies_from_text_any_genre(text,movies_df)
+#     print(raspuns)
+#
+# print('in genuri')
+# print('<----')
 
-
-def recommend_movies(movie_title, cosine_sim_matrix=cosine_sim_df, movies_df=movies_df, top_n=3):
-    # Check if the movie exists in the cosine similarity matrix
-    if movie_title not in cosine_sim_matrix.index:
-        return "Movie not found in the dataset."
-
-    # Get the similarity scores for the input movie with all other movies
-    sim_scores = cosine_sim_matrix[movie_title]
-
-    # Sort the movies based on the similarity scores in descending order
-    sim_scores_sorted = sim_scores.sort_values(ascending=False)
-
-    # Get the titles of the top N most similar movies, excluding the first one (the movie itself)
-    top_similar_titles = sim_scores_sorted.iloc[1:top_n + 1].index.tolist()
-
-    # Return the top N most similar movies
-    return top_similar_titles
-
-
-# Example: Let's get recommendations for "Toy Story (1995)"
-recommended_movies = recommend_movies("Jumanji (1995)")
-print(recommended_movies)
+# text_query = "I'm looking for a comedy and romance movie."
+# print(recommend_movies_from_text(text_query,movies_df),'recommended_movie')
+# print(recommend_movies_from_text_any_genre(text_query, movies_df), 'recommend_movies_from_text_any_genre')
+# print(recommend_movies_from_text_all_genres(text_query, movies_df), 'recommend_movies_from_text_all_genres')
+#
+# recommended_movies = recommend_movies("Jumanji (1995)",cosine_sim_df)
+# print(recommended_movies)
