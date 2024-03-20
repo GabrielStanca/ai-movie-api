@@ -1,25 +1,11 @@
-from interpret.analizaText import extract_keywords
+import pandas as pd
+from nltk import word_tokenize
+from nltk.corpus import stopwords
 
-
-def find_movie_title_in_text(text, movies_df):
-    # Normalize the text for better matching
-    normalized_text = text.lower()
-
-    # Iterate over the movie titles to check for a match
-    for title in movies_df['title']:
-        # Normalize the movie title
-        normalized_title = title.lower()
-
-        # Check if the normalized movie title is in the normalized text
-        if normalized_title in normalized_text:
-            return title  # Return the original title
-
-    # If no movie title is found in the text, return None
-    return None
-
+from interpret.analizaText import extract_keywords_genre
 
 def recommend_movies_from_text(text, movies_df):
-    keywords = extract_keywords(text)
+    keywords = extract_keywords_genre(text)
     keyword_to_genre = {'action': 'Action', 'comedy': 'Comedy', 'romance': 'Romance',
                         'adventure': 'Adventure'}  # Ensure these match your DataFrame's columns
     genres = [keyword_to_genre[keyword] for keyword in keywords if keyword in keyword_to_genre]
@@ -41,7 +27,7 @@ def recommend_movies_from_text(text, movies_df):
         return "No movies found for the given genres."
 
 def recommend_movies_from_text_all_genres(text, movies_df, top_n=3):
-    keywords = extract_keywords(text)
+    keywords = extract_keywords_genre(text)
     keyword_to_genre = {'action': 'Action', 'comedy': 'Comedy', 'romance': 'Romance', 'adventure': 'Adventure'}
     genres_matched = [keyword_to_genre[keyword] for keyword in keywords if keyword in keyword_to_genre]
 
@@ -57,7 +43,7 @@ def recommend_movies_from_text_all_genres(text, movies_df, top_n=3):
         return "No movies found for the given genres."
 
 def recommend_movies_from_text_any_genre(text, movies_df, top_n=3):
-    keywords = extract_keywords(text)
+    keywords = extract_keywords_genre(text)
     keyword_to_genre = {'action': 'Action', 'comedy': 'Comedy', 'romance': 'Romance', 'adventure': 'Adventure'}
     genres_matched = [keyword_to_genre[keyword] for keyword in keywords if keyword in keyword_to_genre]
 
@@ -71,6 +57,37 @@ def recommend_movies_from_text_any_genre(text, movies_df, top_n=3):
         return matching_movies[:top_n]  # Return top N matching movies
     else:
         return "No movies found for the given genres."
+
+def find_movies_by_keywords_with_ratings(text, tags_df, movies_df, ratings_df):
+    # Tokenize the text into words
+    words = word_tokenize(text.lower())
+
+    # Filter out stopwords
+    stop_words = set(stopwords.words('english'))
+    filtered_words = [word for word in words if word.isalnum() and word not in stop_words]
+
+    # Convert filtered words into a set for efficient searching
+    keywords_set = set(filtered_words)
+
+    # Find unique movieIds where the tag matches any of the keywords
+    matching_movie_ids = tags_df[tags_df['tag'].str.lower().apply(lambda tag: any(keyword in tag.split() for keyword in keywords_set))]['movieId'].unique()
+
+    # Retrieve the movies that match the found movieIds
+    matching_movies = movies_df[movies_df['movieId'].isin(matching_movie_ids)]
+
+    # Calculate the average rating for each movie
+    average_ratings = ratings_df.groupby('movieId')['rating'].mean().reset_index()
+
+    # Merge the matching movies with their average ratings
+    matching_movies_with_ratings = pd.merge(matching_movies, average_ratings, on='movieId', how='left')
+
+    # Sort the movies by average rating in descending order
+    matching_movies_sorted = matching_movies_with_ratings.sort_values(by='rating', ascending=False)
+
+    movies_list = matching_movies_sorted[['movieId', 'title', 'rating']].to_dict(orient='records')
+
+
+    return movies_list
 
 def recommend_movies(movie_title, cosine_sim_matrix, top_n=3):
     # Check if the movie exists in the cosine similarity matrix

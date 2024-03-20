@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from typing import List
-from main import *
-from interpret.analizaText import count_genres_in_text
-from interpret.cautariFilme import find_movie_title_in_text, recommend_movies_from_text_any_genre, recommend_movies
+from main import movies_df, cosine_sim_df, tags_df, ratings_df
+from interpret.analizaText import find_movie_title_in_text, count_genres_in_text
+from interpret.cautariFilme import recommend_movies_from_text_any_genre, recommend_movies, find_movies_by_keywords_with_ratings
 
 app = FastAPI()
 
@@ -28,7 +27,8 @@ async def get_recommendations(movie_title: str):
     print(movie_title)
     counter = count_genres_in_text(movie_title)
     movieTitleFound = find_movie_title_in_text(movie_title, movies_df)
-
+    movieKeywords = find_movies_by_keywords_with_ratings(movie_title, tags_df, movies_df, ratings_df)
+    print(movieKeywords)
     if movieTitleFound:
         movieTitleFound = recommend_movies(movieTitleFound, cosine_sim_df)
     else:
@@ -40,7 +40,8 @@ async def get_recommendations(movie_title: str):
 
     raspuns = {
         'recomandareFilme': movieTitleFound,
-        'recomandareGenuri': genuri
+        'recomandareGenuri': genuri,
+        'movieKeywords': movieKeywords
     }
 
     return raspuns
