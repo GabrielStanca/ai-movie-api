@@ -4,27 +4,7 @@ from nltk.corpus import stopwords
 
 from interpret.analizaText import extract_keywords_genre
 
-def recommend_movies_from_text(text, movies_df):
-    keywords = extract_keywords_genre(text)
-    keyword_to_genre = {'action': 'Action', 'comedy': 'Comedy', 'romance': 'Romance',
-                        'adventure': 'Adventure'}  # Ensure these match your DataFrame's columns
-    genres = [keyword_to_genre[keyword] for keyword in keywords if keyword in keyword_to_genre]
 
-    if not genres:
-        return "No matching genres found for the given text."
-
-    genre = genres[0]  # For simplicity, just take the first genre matched for demonstration
-
-    # Check if the genre exists in the DataFrame columns
-    if genre not in movies_df.columns:
-        return f"No movies found for the genre: {genre}."
-
-    movies_matching_genre = movies_df[movies_df[genre] == 1]['title'].tolist()
-
-    if movies_matching_genre:
-        return movies_matching_genre[0]  # Return the first movie that matches the genre
-    else:
-        return "No movies found for the given genres."
 
 def recommend_movies_from_text_all_genres(text, movies_df, top_n=3):
     keywords = extract_keywords_genre(text)
@@ -58,7 +38,7 @@ def recommend_movies_from_text_any_genre(text, movies_df, top_n=3):
     else:
         return "No movies found for the given genres."
 
-def find_movies_by_keywords_with_ratings(text, tags_df, movies_df, ratings_df):
+def find_movies_by_keywords_with_ratings(text, tags_df, movies_df, ratings_df, top_n=3):
     # Tokenize the text into words
     words = word_tokenize(text.lower())
 
@@ -87,7 +67,7 @@ def find_movies_by_keywords_with_ratings(text, tags_df, movies_df, ratings_df):
     movies_list = matching_movies_sorted[['movieId', 'title', 'rating']].to_dict(orient='records')
 
 
-    return movies_list
+    return movies_list[:top_n]
 
 def recommend_movies(movie_title, cosine_sim_matrix, top_n=3):
     # Check if the movie exists in the cosine similarity matrix

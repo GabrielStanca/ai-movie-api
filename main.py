@@ -29,7 +29,11 @@ for genres in movies_df['genres']:
 # Create a column for each genre with binary encoding
 for genre in all_genres:
     movies_df[genre] = movies_df['genres'].apply(lambda x: 1 if genre in x else 0)
+all_genres_list = list(all_genres)
+all_movies_list = list(movies_df['title'])
+all_tags = tags_df['tag'].tolist()
 
+print(all_movies_list)
 # We'll not use the 'timestamp' column from ratings, so let's drop it
 ratings_df.drop('timestamp', axis=1, inplace=True)
 
