@@ -1,3 +1,4 @@
+import pandas as pd
 from google.cloud import language_v1
 from main import movies_df, all_genres_list, all_tags, all_movies_list
 import os
@@ -69,4 +70,5 @@ text = "I would like a movie with action Jumanji: Welcome to the Jungle"
 print('user: ' + text)
 interpretation = interpret_request(text)
 print('ai: ' + interpretation)
+
 

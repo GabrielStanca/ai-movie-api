@@ -61,3 +61,9 @@ def count_genres_in_text(text):
     num_genres = len(genres)
 
     return num_genres
+
+def get_first_number_from_string(s):
+    # Find the first occurrence of one or more digits in the string
+    match = re.search(r'\d+', s)
+    # Return the number as an integer if found, else return None
+    return int(match.group(0)) if match else None

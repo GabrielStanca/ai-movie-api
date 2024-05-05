@@ -1,5 +1,5 @@
 import pandas as pd
-
+from phrases.phrases import rating_phrases,templates_keyword_movies_with_rating
 
 import nltk
 from nltk.tokenize import word_tokenize
@@ -33,7 +33,6 @@ all_genres_list = list(all_genres)
 all_movies_list = list(movies_df['title'])
 all_tags = tags_df['tag'].tolist()
 
-print(all_movies_list)
 # We'll not use the 'timestamp' column from ratings, so let's drop it
 ratings_df.drop('timestamp', axis=1, inplace=True)
 
@@ -51,11 +50,4 @@ cosine_sim = cosine_similarity(genre_matrix, genre_matrix)
 
 # Convert the cosine similarity matrix to a DataFrame for better readability
 cosine_sim_df = pd.DataFrame(cosine_sim, index=movies_df['title'], columns=movies_df['title'])
-
-
-
-
-# text = "funny drama from Pixar"
-# relevant_movies = find_movies_by_keywords_with_ratings(text, tags_df, movies_df, ratings_df)
-# print(relevant_movies[['title', 'rating']])
 
